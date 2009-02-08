@@ -1,0 +1,4 @@
+* Check if it works also on windows (especially the timestamps).
+* Implement regression tests.
+* Add regular expression for filename matching.
+* Add RPM spec file
