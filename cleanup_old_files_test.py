@@ -41,7 +41,7 @@ def genTimeIntervallStr(time1, time2):
     hours = int(diff.seconds/3600)
 
     intervallStr = str(diff.days) + "d" + str(hours) + "h"
-    timestampRounded = max(datetime1, datetime2) - datetime.timedelta(diff.days, hours)
+    timestampRounded = max(datetime1, datetime2) - datetime.timedelta(diff.days, hours*3600)
 
     return intervallStr, int(time.mktime(timestampRounded.timetuple()))
 
@@ -57,7 +57,7 @@ def recursiveDelete(dirname):
 
 
 def main():
-    MAX_NR_OF_FILES = 10
+    MAX_NR_OF_FILES = 10000
 
     parser = optparse.OptionParser(
 	    usage="%prog [options]",
@@ -102,7 +102,7 @@ def main():
 	else:
 	    filesToKeep[filename] = None
 
-    print "nr of filesToKeep: %d, nr of filesToRemove :%d" % (len(filesToKeep), len(filesToRemove))
+    print "Expected: filesToKeep: %d, filesToRemove: %d" % (len(filesToKeep), len(filesToRemove))
 
     origDir = os.path.join(tmpDir, "orig")
     shutil.copytree(testDir, origDir)
@@ -113,7 +113,8 @@ def main():
 
     filesLeft = {}
     for entry in os.listdir(testDir):
-	filesLeft[entry] = None
+	filename = os.path.join(testDir,entry)
+	filesLeft[filename] = None
 
     returnCode = 0
     for key in filesToRemove:
