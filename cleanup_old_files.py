@@ -32,7 +32,7 @@ import time
 VERSIONSTRING = "0.1dev"
 
 
-def deleteFiles(dirName, date, recurse, deleteEmptySubDirs, write):
+def deleteFiles(dirName, date, options):
     '''Recursively delete files in a directory older than a given modification
     date. Symbolic links are not honoured.
     Parameters: dirName: String. Name of the folder to start search.
@@ -44,27 +44,32 @@ def deleteFiles(dirName, date, recurse, deleteEmptySubDirs, write):
     in dirName!
     write: Boolean. Only if set to true files are really deleted.'''
 
-    logging.debug("deleteFiles(%s, %d, %s, %s, %s) called" %
-	    (dirName, date, recurse, deleteEmptySubDirs, write) )
+    logging.debug("deleteFiles(%s, %d, %s) called" %
+	    (dirName, date, options) )
     
     if not os.path.isdir(dirName): return
 
     for entry in os.listdir(dirName):
 	path = os.path.join(dirName, entry)
-	if recurse and os.path.isdir(path):
-	    deleteFiles(path, date, recurse, deleteEmptySubDirs, write)
-	    if deleteEmptySubDirs and (len(os.listdir(path)) == 0):
+	if options.recursive and os.path.isdir(path):
+	    deleteFiles(path, date, options)
+	    if options.emptydelete and (len(os.listdir(path)) == 0):
 		logging.info("Deleting directory " + path)
-		if write:
+		if options.write:
 		    try:
 			os.rmdir(path)
 		    except:
 			logging.error("Could not delete directory " + path)
 	else:
 	    if os.path.isfile(path):
-		if os.path.getmtime(path) < date :
+		filetime = 0
+		if options.ctime :
+		    filetime = os.path.getctime(path)
+		else:
+		    filetime = os.path.getmtime(path)
+		if filetime < date :
 		    logging.info("Deleting file " + path)
-		    if write:
+		    if options.write:
 			try:
 			    os.unlink(path)
 			except:
@@ -123,7 +128,10 @@ def main():
 	    "Copyright (C) 2009 Georg Lutz <georg AT NOSPAM georglutz DOT de>",
 	    epilog = "directory: Directory to scan" + os.linesep +
 	    "max_age: Examples for valid text format: \"3d4h\" (3 days 4 hours), \"3d\" (3 days), \"4h\" (4 hours). Limits: 5 digits for days, 6 digits for hours. Resulting timestamp must be a valid unix timestamp.")
- 
+    
+    parser.add_option("-c", "--ctime", dest="ctime",
+	    default=False, action="store_true",
+	    help="Uses ctime for comparison of timestamp. Default is mtime.")
     parser.add_option("-d", "--debuglevel", dest="debuglevel",
 	    type="int", default=logging.WARNING,
 	    help="Sets numerical debug level, see library logging module. Default is 30 (WARNING). Possible values are CRITICAL 50, ERROR 40, WARNING 30, INFO 20, DEBUG 10, NOTSET 0. All log messages with debuglevel or above are printed. So to disable all output set debuglevel e.g. to 100.")
@@ -163,9 +171,8 @@ def main():
 	logging.error("Resulting date \"" + str(maxAgeDate) + "\" not supported. Year must be >=1970 and <=2038")
 	sys.exit(1)
 
-    deleteFiles(dirName, time.mktime(maxAgeDate[0].timetuple()), options.recursive,
-	    options.emptydelete, options.write)
-
+    deleteFiles(dirName, time.mktime(maxAgeDate[0].timetuple()), options )
+   
 
 if __name__ == "__main__":
     main()
