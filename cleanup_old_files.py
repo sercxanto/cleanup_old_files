@@ -153,6 +153,9 @@ def main():
 	parser.print_help()
 	sys.exit(2)
 
+    if options.emptydelete and not options.recursive:
+	logging.error("empty-delete requires recursive option")
+	sys.exit(2)
 
     dirName = os.path.expanduser(args[0])
     if not os.path.isdir(dirName):
