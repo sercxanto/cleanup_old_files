@@ -2,7 +2,7 @@
 #
 #    cleanup_old_files.py
 #
-#    Deletes files recursively older than a given modification date
+#    Deletes files older than a given age recursively.
 #
 #    Copyright (C) 2009 Georg Lutz <georg AT NOSPAM georglutz DOT de>
 #
@@ -37,12 +37,8 @@ def deleteFiles(dirName, date, options):
     date. Symbolic links are not honoured.
     Parameters: dirName: String. Name of the folder to start search.
     date: Unix timestamp. Files older than date are deleted.
-    recurse: Boolean: Should we descend in directories eventually found in
-    dirName?
-    deleteEmptySubDirs: Boolean: If there are no more files left in a sub
-    directory, should we delete it? Does not apply to current directory given
-    in dirName!
-    write: Boolean. Only if set to true files are really deleted.'''
+    options: Configuration object, see global scope
+'''
 
     logging.debug("deleteFiles(%s, %d, %s) called" %
 	    (dirName, date, options) )
@@ -163,7 +159,7 @@ def main():
 	sys.exit(1)
 
     maxAge = args[1]
-    # use array so parameters are passed as referenc and can be altered
+    # use array so parameters are passed as reference and can be altered
     maxAgeDate = []
     maxAgeDate.append(datetime.datetime.max)
     if not parseMaxAge(maxAge, maxAgeDate):

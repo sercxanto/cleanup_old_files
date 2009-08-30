@@ -1,0 +1,53 @@
+cleanup_old_files.py
+
+Deletes files older than a given age recursively. The age can be matched
+against modification or creation timestamp.  You can use this to regulary
+cleanup files you want to keep only for a specific time.
+
+Use cases may be your download folder, Maildir trash folder, ~/tmp or flash
+cookies.
+
+Examples:
+
+$ cleanup_old_files.py -cw ~/Maildir/.Trash/cur 7d;\
+  cleanup_old_files.py -cw ~/Maildir/.Trash/new 7d;\
+  cleanup_old_files.py -cw ~/Maildir/.Trash/tmp 7d
+
+The script is called for each Maildir subdirectory seperately so that it
+doesn't delete potentially important metadata files located directly in
+~/Maildir/.Trash/. The Courier IMAP server e.g. holds there its folder metadata
+such as UID database and ACL information (Maildir++).
+
+The "-w" needs to be set to actually delete files. By default
+cleanup_old_files.py doesn't delete anything.
+
+When files are moved to the trash folder their modification timestamp will
+remain the same as in the original location. As we want to match the age
+against the time of deletion we will have to use the creation timestamp here
+with the "-c" option.
+
+$ cleanup_old_files.py -erw ~/tmp 3d
+
+Here the "-r" and "-e" option is given to instruct cleanup_old_files.py to also
+delete empty subdirectories. Of course "-e" makes only sense in conjunction
+with "-r".
+
+Undisturbed by any browser based cookie privacy protection the flash plugin
+stores its settings on the local harddrive. By default a flash program can
+store 100kB information in such a way. Also note that flash maintains a cache
+of downloaded SWF files. As the URL is encoded in the filename this is
+effectively a history of flash based website - independend from any browser
+history privacy settings.
+
+If you would like to get at least rid of information of sites you don't visit
+regulary you may be call cleanup_old_files.py like this
+
+$ touch ~/.macromedia/Flash_Player/macromedia.com/support/flashplayer/sys/settings.sol;\
+  cleanup_old_files.py -erw ~/.macromedia 7d
+
+Flash stores its privacy settings in the file settings.sol which you perhaps
+want to preserve. You can touch it before to protect it against deletion. But
+note that visited flash URLs are also stored in settings.sol .
+
+
+See ./cleanup_old_files.py --help for more information.
